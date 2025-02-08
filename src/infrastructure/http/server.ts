@@ -1,8 +1,12 @@
 import express, { Request, Response } from "express";
 
+import { setupSwagger } from "../../config/swagger";
+
 const app = express();
 
 app.use(express.json());
+
+setupSwagger(app);
 
 app.get("/", (_: Request, res: Response) => {
   res.send(`    

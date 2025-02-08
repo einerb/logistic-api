@@ -3,7 +3,7 @@ services:
     build: .
     container_name: coordinadora
     ports:
-      - "3000:3000"
+      - "3002:3002"
     env_file:
       - .env
     volumes:
