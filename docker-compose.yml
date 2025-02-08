@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    container_name: coordinadora-api
+    container_name: coordinadora
     ports:
       - "3000:3000"
     env_file:
@@ -17,11 +17,11 @@ services:
     image: postgres:16
     container_name: coordinadora-db
     environment:
-      POSTGRES_DB: ${POSTGRES_DB?err}
-      POSTGRES_USER: ${POSTGRES_USER?err}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?err}
+      POSTGRES_DB: ${DB_NAME?err}
+      POSTGRES_USER: ${DB_USER?err}
+      POSTGRES_PASSWORD: ${DB_PASSWORD?err}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
