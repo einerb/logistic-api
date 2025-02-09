@@ -67,6 +67,10 @@ export default class AuthController {
         loginUserDto.password
       );
 
+      if (!token) {
+        throw new ApiError(401, "Invalid credentials!");
+      }
+
       const response = new ApiResponse(1002, "Login successful!", {
         accessToken: token,
       });

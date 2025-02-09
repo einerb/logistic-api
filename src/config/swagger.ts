@@ -11,8 +11,18 @@ const options: swaggerJSDoc.Options = {
       description:
         "Documentación oficial de los endpoints para la gestión y rutas logísticas para la empresa Coordinadora Colombia",
     },
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [{ BearerAuth: [] }],
   },
-  apis: ["./src/routes/*.ts"],
+  apis: ["./src/application/dtos/**/*.ts", "./src/infrastructure/routes/*.ts"],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
