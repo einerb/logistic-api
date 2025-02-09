@@ -4,6 +4,7 @@ import UserRepository from "../../../domain/repositories/UserRepository";
 import User from "../../../domain/entities/User";
 import { UserRoleEnum } from "../../../shared/enums/role";
 import { RegisterUserResponseDTO } from "../../dtos";
+import { ApiError } from "../../../shared/utils/api-error";
 
 export default class RegisterUserUseCase {
   constructor(private userRepository: UserRepository) {}
@@ -18,7 +19,7 @@ export default class RegisterUserUseCase {
     const existingUser = await this.userRepository.findByEmail(email);
 
     if (existingUser) {
-      throw new Error("User is already registered with this email!");
+      throw new ApiError(409, "User is already registered with this email!");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { validate } from "class-validator";
 import { plainToInstance } from "class-transformer";
 
@@ -9,16 +9,21 @@ import {
 } from "../../../application/use-cases/auth";
 import { LoginUserDTO, RegisterUserDTO } from "../../../application/dtos";
 import UserRepositoryPostgres from "../../../infrastructure/persistence/UserRepositoryDB";
+import { ApiResponse } from "../../../shared/utils/api-response";
+import { ApiError } from "../../../shared/utils/api-error";
 
 export default class AuthController {
-  static async register(req: Request, res: Response): Promise<void> {
+  static async register(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const registerUserDto = plainToInstance(RegisterUserDTO, req.body);
       const errors = await validate(registerUserDto);
 
       if (errors.length > 0) {
-        res.status(400).json({ errors });
-        return;
+        throw ApiError.fromValidationErrors(errors);
       }
 
       const userRepository = new UserRepositoryPostgres(pool);
@@ -31,20 +36,28 @@ export default class AuthController {
         registerUserDto.role
       );
 
-      res.status(201).json(user);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      const response = new ApiResponse(
+        1001,
+        "User registered successfully",
+        user
+      );
+      res.status(201).json(response);
+    } catch (error) {
+      next(error);
     }
   }
 
-  static async login(req: Request, res: Response): Promise<void> {
+  static async login(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const loginUserDto = plainToInstance(LoginUserDTO, req.body);
       const errors = await validate(loginUserDto);
 
       if (errors.length > 0) {
-        res.status(400).json({ errors });
-        return;
+        throw ApiError.fromValidationErrors(errors);
       }
 
       const userRepository = new UserRepositoryPostgres(pool);
@@ -54,14 +67,12 @@ export default class AuthController {
         loginUserDto.password
       );
 
-      if (!token) {
-        res.status(401).json({ message: "Invalid credentials!" });
-        return;
-      }
-
-      res.status(200).json({ token });
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      const response = new ApiResponse(1002, "Login successful!", {
+        accessToken: token,
+      });
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
     }
   }
 }
