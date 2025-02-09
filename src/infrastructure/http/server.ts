@@ -1,10 +1,13 @@
 import express, { Request, Response } from "express";
 
 import { setupSwagger } from "../../config/swagger";
+import { authRoutes } from "../routes";
 
 const app = express();
 
 app.use(express.json());
+
+app.use("/api/v1/auth", authRoutes);
 
 setupSwagger(app);
 
