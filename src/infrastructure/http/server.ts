@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 
 import { setupSwagger } from "../../config/swagger";
-import { authRoutes } from "../routes";
+import { authRoutes, shippingRoutes } from "../routes";
 import { errorHandler } from "./middlewares/error-handler";
 
 const app = express();
@@ -9,6 +9,7 @@ const app = express();
 app.use(express.json());
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/shipping-orders", shippingRoutes);
 
 app.use(errorHandler);
 
