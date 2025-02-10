@@ -9,7 +9,7 @@ const router = Router();
  * @swagger
  * /api/v1/auth/register:
  *   post:
- *     summary: User registered successfully
+ *     summary: User registered
  *     tags: [Auth]
  *     security: []
  *     requestBody:

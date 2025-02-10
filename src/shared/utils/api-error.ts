@@ -8,10 +8,24 @@ export class ApiError extends Error {
   }
 
   static fromValidationErrors(errors: any[]) {
-    const formattedErrors = errors.map((error) => ({
-      field: error.property,
-      errors: Object.values(error.constraints || {}),
-    }));
+    const formatError = (error: any, parentField = "") => {
+      const field = parentField
+        ? `${parentField}.${error.property}`
+        : error.property;
+
+      if (error.children && error.children.length > 0) {
+        return error.children.flatMap((child: any) =>
+          formatError(child, field)
+        );
+      }
+
+      return {
+        field,
+        errors: Object.values(error.constraints || {}),
+      };
+    };
+
+    const formattedErrors = errors.flatMap((error) => formatError(error));
 
     return new ApiError(400, "Validation errors", formattedErrors);
   }

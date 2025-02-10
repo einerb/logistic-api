@@ -1,33 +1,28 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 
 import { UserRoleEnum } from "../../../shared/enums/role";
+import { ApiError } from "../../../shared/utils/api-error";
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    name: string;
+    role: UserRoleEnum;
+  };
+}
 
 export const validateRole = (allowedRole: UserRoleEnum) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization?.split(" ")[1];
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const userRole = req.user?.role;
 
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" });
+    if (!userRole) {
+      return next(new ApiError(403, "No user role found!"));
     }
 
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-        userId: string;
-        name: string;
-        role: UserRoleEnum;
-      };
-      const userRole = decoded.role;
-
-      if (userRole !== allowedRole) {
-        return res.status(403).json({ message: "Access denied!" });
-      }
-
-      req.user = decoded;
-
-      next();
-    } catch (error) {
-      return res.status(401).json({ message: "Invalid token!" });
+    if (userRole !== allowedRole) {
+      return next(new ApiError(403, "Insufficient role"));
     }
+
+    next();
   };
 };

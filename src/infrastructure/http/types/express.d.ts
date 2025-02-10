@@ -1,13 +1,15 @@
-import { UserRole } from "../../domain/entities/User";
+import { UserRoleEnum } from "../domain/enums/UserRoleEnum";
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        userId: string;
-        name: string;
-        role: UserRole;
-      };
-    }
+declare module "express" {
+  interface Request {
+    user?: {
+      id: string;
+      name: string;
+      role: UserRoleEnum;
+    };
   }
+}
+
+export interface AuthenticatedRequest extends Request {
+  user?: User;
 }

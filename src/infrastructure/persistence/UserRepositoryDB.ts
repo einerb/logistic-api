@@ -42,8 +42,8 @@ export default class UserRepositoryPostgres implements UserRepository {
       row.lastname,
       row.email,
       row.password,
-      row.is_active,
-      row.role
+      row.role,
+      row.is_active
     );
 
     user.id = row.id;
