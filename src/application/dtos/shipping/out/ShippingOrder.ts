@@ -2,6 +2,9 @@ import { Package } from "../../../../domain/entities";
 
 export default class CreateShippingOrderResponseDTO {
   id: string;
+  origin: {
+    name: string;
+  };
   packages: {
     id: string;
     weight: number;
@@ -13,6 +16,8 @@ export default class CreateShippingOrderResponseDTO {
     productType: string;
   }[];
   destinationAddress: {
+    name: string;
+    phone: string;
     street: string;
     city: string;
     state: string;
@@ -28,6 +33,9 @@ export default class CreateShippingOrderResponseDTO {
 
   constructor(
     id: string,
+    origin: {
+      name: string;
+    },
     packages: {
       id: string;
       weight: number;
@@ -35,6 +43,8 @@ export default class CreateShippingOrderResponseDTO {
       productType: string;
     }[],
     destinationAddress: {
+      name: string;
+      phone: string;
       street: string;
       city: string;
       state: string;
@@ -46,6 +56,7 @@ export default class CreateShippingOrderResponseDTO {
     createdAt: Date
   ) {
     this.id = id;
+    this.origin = origin;
     this.packages = packages;
     this.destinationAddress = destinationAddress;
     this.status = status;
@@ -55,6 +66,9 @@ export default class CreateShippingOrderResponseDTO {
   static fromEntity(shippingOrder: any): CreateShippingOrderResponseDTO {
     return new CreateShippingOrderResponseDTO(
       shippingOrder.order.id,
+      {
+        name: shippingOrder.order.user.name,
+      },
       shippingOrder.packages.map((pkg: Package) => ({
         id: pkg.id,
         weight: pkg.weight,
@@ -66,6 +80,8 @@ export default class CreateShippingOrderResponseDTO {
         productType: pkg.productType,
       })),
       {
+        name: shippingOrder.order.destinationAddress.name,
+        phone: shippingOrder.order.destinationAddress.phone,
         street: shippingOrder.order.destinationAddress.street,
         city: shippingOrder.order.destinationAddress.city,
         state: shippingOrder.order.destinationAddress.state,

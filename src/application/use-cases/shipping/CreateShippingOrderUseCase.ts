@@ -14,9 +14,9 @@ export default class CreateShippingOrderUseCase {
   private readonly MAX_ORDERS_PER_ADDRESS_PER_DAY = 2;
 
   constructor(
-    private shippingOrderRepository: ShippingOrderRepository,
-    private packageRepository: PackageRepository,
-    private addressValidationService: ValidationAddressService
+    private readonly shippingOrderRepository: ShippingOrderRepository,
+    private readonly packageRepository: PackageRepository,
+    private readonly addressValidationService: ValidationAddressService
   ) {}
 
   async execute(

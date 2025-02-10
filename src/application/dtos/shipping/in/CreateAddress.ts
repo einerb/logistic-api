@@ -17,6 +17,14 @@ class CoordinateDTO {
 export default class CreateAddressDTO {
   @IsString()
   @IsNotEmpty()
+  name!: string;
+
+  @IsString()
+  @IsOptional()
+  phone?: string;
+
+  @IsString()
+  @IsNotEmpty()
   street!: string;
 
   @IsString()

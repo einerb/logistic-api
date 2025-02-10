@@ -46,12 +46,19 @@ import CreateAddressDTO from "./CreateAddress";
  *           type: object
  *           description: Address where the shipment is to be delivered
  *           required:
+ *             - name
  *             - street
  *             - city
  *             - state
  *             - postalCode
  *             - country
  *           properties:
+ *             name:
+ *               type: string
+ *               example: "Juan Peréz"
+ *             phone:
+ *               type: string
+ *               example: "3211233212"
  *             street:
  *               type: string
  *               example: "Cl. 69c #2-4"
