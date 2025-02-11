@@ -10,6 +10,7 @@ import { ApiError } from "../../../shared/utils/api-error";
 import {
   CreateShippingOrderUseCase,
   GetShippingOrderStatusUseCase,
+  ReportShipmentAdvancedUseCase,
   UpdateShippingOrderStatusUseCase,
 } from "../../../application/use-cases/shipping";
 import { ApiResponse } from "../../../shared/utils/api-response";
@@ -157,7 +158,7 @@ export default class ShippingController {
       );
 
       const response = new ApiResponse(
-        1004,
+        1005,
         "Shipment status updated!",
         updateStatus
       );
@@ -190,10 +191,38 @@ export default class ShippingController {
       const getStatus = await getShipmentUserCase.execute(shippingOrderId);
 
       const response = new ApiResponse(
-        1004,
+        1006,
         "Shipment status found!",
         getStatus
       );
+
+      res.status(201).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async reportAdvanced(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { startDate, endDate, status, carrierId, page, limit } = req.query;
+
+      const shipmentRepository = new ShippingOrderRepositoryPostgres(pool);
+      const redisService = new RedisCacheService();
+
+      const reportAdvancedUseCase = new ReportShipmentAdvancedUseCase(
+        shipmentRepository,
+        redisService
+      );
+
+      const results = await reportAdvancedUseCase.execute({
+        startDate: startDate as string,
+        endDate: endDate as string,
+        status: status as string,
+        carrierId: carrierId as string,
+        page: page ? parseInt(page as string) : 1,
+        limit: limit ? parseInt(limit as string) : 12,
+      });
+      const response = new ApiResponse(1007, "Results found!", results);
 
       res.status(201).json(response);
     } catch (error) {

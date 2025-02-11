@@ -4,6 +4,7 @@ import { setupSwagger } from "../../config/swagger";
 import {
   authRoutes,
   carrierRoutes,
+  reportRoutes,
   shippingRoutes,
   vehicleRoutes,
 } from "../routes";
@@ -17,6 +18,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/shipping-orders", shippingRoutes);
 app.use("/api/v1/carriers", carrierRoutes);
 app.use("/api/v1/vehicles", vehicleRoutes);
+app.use("/api/v1/report-advanced", reportRoutes);
 
 app.use(errorHandler);
 

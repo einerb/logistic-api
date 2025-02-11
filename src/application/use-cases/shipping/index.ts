@@ -2,3 +2,4 @@ export { default as CreateShippingOrderUseCase } from "./CreateShippingOrderUseC
 export { default as AssignRouteToShippingOrderUseCase } from "./AssignRouteToShippingOrderUseCase";
 export { default as UpdateShippingOrderStatusUseCase } from "./UpdateShippingOrderStatusUseCase";
 export { default as GetShippingOrderStatusUseCase } from "./GetShippingOrderStatusUseCase";
+export { default as ReportShipmentAdvancedUseCase } from "./ReportShipmentAdvancedUseCase";

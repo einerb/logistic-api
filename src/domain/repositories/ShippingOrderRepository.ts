@@ -14,4 +14,12 @@ export default interface ShippingOrderRepository {
     routeId: string
   ): Promise<void>;
   updateStatus(shippingOrder: ShippingOrder): Promise<void>;
+  getAdvancedReport(filters: {
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+    carrierId?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any>;
 }

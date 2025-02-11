@@ -188,4 +188,109 @@ export default class ShippingOrderRepositoryPostgres
       [shippingOrder.status, shippingOrder.id]
     );
   }
+
+  async getAdvancedReport(filters: {
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+    carrierId?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any> {
+    const {
+      startDate,
+      endDate,
+      status,
+      carrierId,
+      page = 1,
+      limit = 10,
+    } = filters;
+    const offset = (page - 1) * limit;
+
+    const queryParams: any[] = [];
+    const conditions: string[] = ["so.deleted_at IS NULL"];
+
+    if (startDate) {
+      conditions.push(`so.created_at >= $${queryParams.length + 1}`);
+      queryParams.push(startDate);
+    }
+
+    if (endDate) {
+      conditions.push(`so.created_at <= $${queryParams.length + 1}`);
+      queryParams.push(endDate);
+    }
+
+    if (status) {
+      conditions.push(`so.status = $${queryParams.length + 1}`);
+      queryParams.push(status);
+    }
+
+    if (carrierId) {
+      conditions.push(`r.assigned_carrier_id = $${queryParams.length + 1}`);
+      queryParams.push(carrierId);
+    }
+
+    const query = `
+      WITH shipment_data AS (
+        SELECT 
+          so.id, so.status, so.created_at, so.updated_at,
+          r.assigned_carrier_id, 
+          EXTRACT(EPOCH FROM (so.updated_at - so.created_at)) / 60 AS deliveryTimeMinutes
+        FROM shipping_orders so
+        LEFT JOIN routes r ON so.assigned_route_id = r.id
+        WHERE ${conditions.join(" AND ")}
+      ),
+      carrier_performance AS (
+        SELECT
+          sd.assigned_carrier_id,
+          COUNT(sd.id) AS totalShipments,
+          AVG(sd.deliveryTimeMinutes) AS avgDeliveryTimeMinutes
+        FROM shipment_data sd
+        WHERE sd.status = 'DELIVERED'
+        GROUP BY sd.assigned_carrier_id
+      )
+      SELECT 
+        sd.id, sd.status, sd.created_at AS createdAt, sd.updated_at AS updatedAt,
+        c.id AS carrierId, c.name AS carrierName,
+        v.model AS vehicleModel, v.license_plate AS vehicleLicense,
+        sd.deliveryTimeMinutes,
+        cp.totalShipments,
+        cp.avgDeliveryTimeMinutes,
+        COUNT(*) OVER() AS totalRecords
+      FROM shipment_data sd
+      LEFT JOIN carriers c ON sd.assigned_carrier_id = c.id
+      LEFT JOIN vehicles v ON c.id = v.id
+      LEFT JOIN carrier_performance cp ON sd.assigned_carrier_id = cp.assigned_carrier_id
+      ORDER BY sd.created_at DESC
+      LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
+    `;
+
+    queryParams.push(limit, offset);
+
+    const result = await this.pool.query(query, queryParams);
+
+    const totalRecords =
+      result.rows.length > 0 ? result.rows[0].totalRecords : 0;
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    return {
+      data: result.rows,
+      metrics: {
+        totalShipments: result.rows.reduce(
+          (acc, row) => acc + (row.totalShipments || 0),
+          0
+        ),
+        avgDeliveryTimeMinutes:
+          result.rows.reduce(
+            (acc, row) => acc + (row.avgDeliveryTimeMinutes || 0),
+            0
+          ) / result.rows.length || 0,
+      },
+      pagination: {
+        totalRecords,
+        totalPages,
+        currentPage: page,
+      },
+    };
+  }
 }
