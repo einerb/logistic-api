@@ -10,8 +10,11 @@ services:
       - .:/app
       - /app/node_modules
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: [ "sh", "-c", "yarn install && npm run migrate && npm run start" ]
 
   db:
     image: postgres:16
@@ -21,9 +24,14 @@ services:
       POSTGRES_USER: ${DB_USER?err}
       POSTGRES_PASSWORD: ${DB_PASSWORD?err}
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${DB_USER?err}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7
