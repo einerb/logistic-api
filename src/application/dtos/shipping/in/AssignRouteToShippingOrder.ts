@@ -7,10 +7,6 @@ export default class AssignRouteToShippingOrderDTO {
 
   @IsString()
   @IsNotEmpty()
-  routeId!: string;
-
-  @IsString()
-  @IsNotEmpty()
   vehicleId!: string;
 
   @IsString()

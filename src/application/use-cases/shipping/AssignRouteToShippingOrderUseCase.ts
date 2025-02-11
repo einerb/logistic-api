@@ -40,19 +40,25 @@ export default class AssignRouteToShippingOrderUseCase {
       throw new ApiError(409, "Shipment order is already assigned to route!");
     }
 
-    const route = await this.routeRepository.findById(assignRouteDto.routeId);
-    if (!route) {
-      throw new ApiError(404, "Route not found!");
+    if (!shippingOrder.destinationAddress.coordinates) {
+      throw new ApiError(400, "Destination address is missing coordinates");
     }
+    const bestRouteId =
+      await this.routeRepository.findBestRouteForShippingOrder(
+        shippingOrder.destinationAddress.coordinates.lat,
+        shippingOrder.destinationAddress.coordinates.lng
+      );
 
-    const vehicle = await this.vehicleRepository.findByPlate(
+    if (!bestRouteId) throw new ApiError(404, "No suitable route found!");
+
+    const vehicle = await this.vehicleRepository.findById(
       assignRouteDto.vehicleId
     );
     if (!vehicle) {
       throw new ApiError(404, "Vehicle not found!");
     }
 
-    const carrier = await this.carrierRepository.findByName(
+    const carrier = await this.carrierRepository.findById(
       assignRouteDto.carrierId
     );
     if (!carrier) {
@@ -74,23 +80,21 @@ export default class AssignRouteToShippingOrderUseCase {
     }
 
     await this.routeRepository.assignCarrierAndVehicleToRoute(
-      route.id,
+      bestRouteId,
       carrier.id,
       vehicle.id
     );
 
     await this.shippingOrderRepository.assignRouteToShippingOrder(
       shippingOrder.id,
-      route.id
+      bestRouteId
     );
 
     const shippingOrderUpdated = await this.shippingOrderRepository.findById(
       assignRouteDto.shippingOrderId
     );
 
-    const routeAssigned = await this.routeRepository.findById(
-      assignRouteDto.routeId
-    );
+    const routeAssigned = await this.routeRepository.findById(bestRouteId);
 
     return AssignShippingOrderResponseDTO.fromEntity(
       shippingOrderUpdated,

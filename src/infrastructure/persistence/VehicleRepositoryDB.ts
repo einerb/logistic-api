@@ -27,13 +27,40 @@ export default class VehicleRepositoryPostgres implements VehicleRepository {
     );
   }
 
-  async findByPlate(id: string): Promise<Vehicle | null> {
+  async findById(id: string): Promise<Vehicle | null> {
+    const result = await this.pool.query(
+      `SELECT id, capacity_volumen_max AS "capacityVolumenMax",
+       capacity_weight_max AS "capacityWeightMax", model,
+       license_plate AS "licensePlate", created_at AS "createdAt",
+       updated_at AS "updatedAt" FROM vehicles WHERE id = $1 AND deleted_at IS NULL`,
+      [id]
+    );
+
+    if (result.rows.length === 0) return null;
+
+    const row = result.rows[0];
+
+    const vehicle = new Vehicle(
+      row.capacityVolumenMax,
+      row.capacityWeightMax,
+      row.model,
+      row.licensePlate
+    );
+
+    vehicle.id = row.id;
+    vehicle.createdAt = row.createdAt;
+    vehicle.updatedAt = row.updatedAt;
+
+    return vehicle;
+  }
+
+  async findByPlate(licensePlate: string): Promise<Vehicle | null> {
     const result = await this.pool.query(
       `SELECT id, capacity_volumen_max AS "capacityVolumenMax",
        capacity_weight_max AS "capacityWeightMax", model,
        license_plate AS "licensePlate", created_at AS "createdAt",
        updated_at AS "updatedAt" FROM vehicles WHERE license_plate = $1 AND deleted_at IS NULL`,
-      [id]
+      [licensePlate]
     );
 
     if (result.rows.length === 0) return null;

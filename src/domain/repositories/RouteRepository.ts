@@ -8,4 +8,8 @@ export default interface RouteRepository {
     carrierId: string,
     vehicleId: string
   ): Promise<void>;
+  findBestRouteForShippingOrder(
+    clientLat: number,
+    clientLng: number
+  ): Promise<string>;
 }

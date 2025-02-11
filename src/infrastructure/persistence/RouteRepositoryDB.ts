@@ -81,4 +81,32 @@ export default class RouteRepositoryPostgres implements RouteRepository {
       [carrierId, vehicleId, routeId]
     );
   }
+
+  async findBestRouteForShippingOrder(
+    clientLat: number,
+    clientLng: number
+  ): Promise<string> {
+    const query = `
+      WITH distances AS (
+          SELECT
+              id,
+              estimated_time,
+              distance_km,
+              (6371 * acos(
+                  cos(radians($1)) * cos(radians(destination_lat)) * 
+                  cos(radians(destination_lng) - radians($2)) + 
+                  sin(radians($1)) * sin(radians(destination_lat))
+              )) AS distance_to_destination
+          FROM routes
+      )
+      SELECT id, estimated_time, distance_km, distance_to_destination
+      FROM distances
+      ORDER BY distance_to_destination ASC, estimated_time ASC
+      LIMIT 1
+    `;
+
+    const bestRoute = await this.pool.query(query, [clientLng, clientLat]);
+
+    return bestRoute.rows[0]?.id;
+  }
 }

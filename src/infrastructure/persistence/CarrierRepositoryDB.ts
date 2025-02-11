@@ -26,6 +26,32 @@ export default class CarrierRepositoryPostgres implements CarrierRepository {
     );
   }
 
+  async findById(id: string): Promise<Carrier | null> {
+    const result = await this.pool.query(
+      `SELECT id, name, shift_start AS "shiftStart", shift_end AS "shiftEnd",
+       status, created_at, updated_at, deleted_at, created_at AS "createdAt",
+       updated_at AS "updatedAt" FROM carriers WHERE id = $1 AND deleted_at IS NULL`,
+      [id]
+    );
+
+    if (result.rows.length === 0) return null;
+
+    const row = result.rows[0];
+
+    const carrier = new Carrier(
+      row.name,
+      row.status,
+      row.shiftStart,
+      row.shiftEnd
+    );
+
+    carrier.id = row.id;
+    carrier.createdAt = row.createdAt;
+    carrier.updatedAt = row.updatedAt;
+
+    return carrier;
+  }
+
   async findByName(name: string): Promise<Carrier | null> {
     const result = await this.pool.query(
       `SELECT id, name, shift_start AS "shiftStart", shift_end AS "shiftEnd",
