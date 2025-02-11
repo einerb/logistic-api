@@ -44,4 +44,18 @@ router.patch(
   asyncHandler(ShippingController.assignRouteToShippingOrder)
 );
 
+router.patch(
+  "/:shippingOrderId",
+  authenticateJWT,
+  validateRole(UserRoleEnum.ADMIN),
+  asyncHandler(ShippingController.updateStatusShipment)
+);
+
+router.get(
+  "/:shippingOrderId",
+  authenticateJWT,
+  validateRole(UserRoleEnum.CLIENT),
+  asyncHandler(ShippingController.getStatusShipment)
+);
+
 export default router;

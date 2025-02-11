@@ -181,4 +181,11 @@ export default class ShippingOrderRepositoryPostgres
       [routeId, shippingOrderId]
     );
   }
+
+  async updateStatus(shippingOrder: ShippingOrder): Promise<void> {
+    await this.pool.query(
+      `UPDATE shipping_orders SET status = $1, updated_at = NOW() WHERE id = $2`,
+      [shippingOrder.status, shippingOrder.id]
+    );
+  }
 }

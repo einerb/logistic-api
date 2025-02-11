@@ -12,4 +12,9 @@ export default class ShippingOrder extends BaseEntity {
   ) {
     super();
   }
+
+  updateStatus(newStatus: ShippingStatus): void {
+    this.status = newStatus;
+    this.updateTimestamps();
+  }
 }

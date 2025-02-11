@@ -1,5 +1,5 @@
 import { validate } from "class-validator";
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { plainToInstance } from "class-transformer";
 
 import pool from "../../../infrastructure/config/database";
@@ -7,7 +7,11 @@ import CreateShippingOrderDTO from "../../../application/dtos/shipping/in/Create
 import ShippingOrderRepositoryPostgres from "../../../infrastructure/persistence/ShippingOrderRepositoryDB";
 import ValidationAddressService from "../../../domain/services/ValidationAddressService";
 import { ApiError } from "../../../shared/utils/api-error";
-import { CreateShippingOrderUseCase } from "../../../application/use-cases/shipping";
+import {
+  CreateShippingOrderUseCase,
+  GetShippingOrderStatusUseCase,
+  UpdateShippingOrderStatusUseCase,
+} from "../../../application/use-cases/shipping";
 import { ApiResponse } from "../../../shared/utils/api-response";
 import { User } from "../../../domain/entities";
 import { AuthenticatedRequest } from "../../../infrastructure/http/types/express";
@@ -20,7 +24,11 @@ import {
   CarrierAvailabilityService,
   ShipmentCapacityService,
 } from "../../../domain/services";
-import { AssignRouteToShippingOrderDTO } from "../../../application/dtos";
+import {
+  AssignRouteToShippingOrderDTO,
+  UpdateStatusShipmentDTO,
+} from "../../../application/dtos";
+import { RedisCacheService } from "../../../infrastructure/cache";
 
 export default class ShippingController {
   static async createShippingOrder(
@@ -108,6 +116,83 @@ export default class ShippingController {
         1004,
         "Routing to shipment successful!",
         assignRouteShipment
+      );
+
+      res.status(201).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async updateStatusShipment(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { shippingOrderId } = req.params;
+      if (!shippingOrderId) {
+        new ApiError(400, "Parameter not found!");
+      }
+
+      const updateDto = plainToInstance(UpdateStatusShipmentDTO, req.body);
+
+      const errors = await validate(updateDto);
+
+      if (errors.length > 0) {
+        throw ApiError.fromValidationErrors(errors);
+      }
+
+      const shipmentRepository = new ShippingOrderRepositoryPostgres(pool);
+      const redisService = new RedisCacheService();
+
+      const statusNewUserCase = new UpdateShippingOrderStatusUseCase(
+        shipmentRepository,
+        redisService
+      );
+
+      const updateStatus = await statusNewUserCase.execute(
+        shippingOrderId,
+        updateDto.status
+      );
+
+      const response = new ApiResponse(
+        1004,
+        "Shipment status updated!",
+        updateStatus
+      );
+
+      res.status(201).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getStatusShipment(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { shippingOrderId } = req.params;
+      if (!shippingOrderId) {
+        new ApiError(400, "Parameter not found!");
+      }
+
+      const shipmentRepository = new ShippingOrderRepositoryPostgres(pool);
+      const redisService = new RedisCacheService();
+
+      const getShipmentUserCase = new GetShippingOrderStatusUseCase(
+        shipmentRepository,
+        redisService
+      );
+
+      const getStatus = await getShipmentUserCase.execute(shippingOrderId);
+
+      const response = new ApiResponse(
+        1004,
+        "Shipment status found!",
+        getStatus
       );
 
       res.status(201).json(response);

@@ -13,4 +13,5 @@ export default interface ShippingOrderRepository {
     shippingOrderId: string,
     routeId: string
   ): Promise<void>;
+  updateStatus(shippingOrder: ShippingOrder): Promise<void>;
 }

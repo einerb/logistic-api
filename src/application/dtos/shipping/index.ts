@@ -5,4 +5,5 @@ export { default as AssignRouteToShippingOrderDTO } from "./in/AssignRouteToShip
 export { default as CreateCarrierDTO } from "./in/CreateCarrier";
 export { default as CreateRouteDTO } from "./in/CreateRoute";
 export { default as CreateVehicleDTO } from "./in/CreateVehicle";
+export { default as UpdateStatusShipmentDTO } from "./in/UpdateStatusShipment";
 export { default as CreateShippingOrderResponseDTO } from "./out/ShippingOrder";
