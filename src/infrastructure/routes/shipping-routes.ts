@@ -25,8 +25,8 @@ const router = Router();
  *         description: Shipping order created successfully
  *       400:
  *         description: >
- *           - Validation error  
- *           - You can only send up to 2 orders to this address per day!  
+ *           - Validation error
+ *           - You can only send up to 2 orders to this address per day!
  *           - You can only send up to 10 packages per order!
  */
 
@@ -35,6 +35,13 @@ router.post(
   authenticateJWT,
   validateRole(UserRoleEnum.CLIENT),
   asyncHandler(ShippingController.createShippingOrder)
+);
+
+router.patch(
+  "/assign-shipment",
+  authenticateJWT,
+  validateRole(UserRoleEnum.ADMIN),
+  asyncHandler(ShippingController.assignRouteToShippingOrder)
 );
 
 export default router;

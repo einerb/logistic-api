@@ -1,9 +1,7 @@
 CREATE TABLE shipping_orders (
     id UUID PRIMARY KEY,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    assigned_route_id UUID REFERENCES routes(id),
-    assigned_carrier_id UUID REFERENCES carriers(id),
-    assigned_vehicle_id UUID REFERENCES vehicles(id),
+    assigned_route_id UUID REFERENCES routes(id) ON DELETE SET NULL,
     name VARCHAR(100) NOT NULL,
     phone VARCHAR(13),
     street VARCHAR(255) NOT NULL,

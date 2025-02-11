@@ -8,4 +8,9 @@ export default interface ShippingOrderRepository {
     date: Date,
     userId: string
   ): Promise<number>;
+  findById(id: string): Promise<ShippingOrder | null>;
+  assignRouteToShippingOrder(
+    shippingOrderId: string,
+    routeId: string
+  ): Promise<void>;
 }

@@ -1,3 +1,4 @@
+import { User } from "../../../domain/entities";
 import { UserRoleEnum } from "../domain/enums/UserRoleEnum";
 
 declare module "express" {

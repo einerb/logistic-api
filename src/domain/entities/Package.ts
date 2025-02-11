@@ -19,4 +19,10 @@ export default class Package extends BaseEntity {
     this.shippingOrderId =
       typeof shippingOrder === "string" ? shippingOrder : shippingOrder.id;
   }
+
+  getVolume(): number {
+    return (
+      this.dimensions.length * this.dimensions.width * this.dimensions.height
+    );
+  }
 }

@@ -1,7 +1,12 @@
 import express, { Request, Response } from "express";
 
 import { setupSwagger } from "../../config/swagger";
-import { authRoutes, shippingRoutes } from "../routes";
+import {
+  authRoutes,
+  carrierRoutes,
+  shippingRoutes,
+  vehicleRoutes,
+} from "../routes";
 import { errorHandler } from "./middlewares/error-handler";
 
 const app = express();
@@ -10,6 +15,8 @@ app.use(express.json());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/shipping-orders", shippingRoutes);
+app.use("/api/v1/carriers", carrierRoutes);
+app.use("/api/v1/vehicles", vehicleRoutes);
 
 app.use(errorHandler);
 
