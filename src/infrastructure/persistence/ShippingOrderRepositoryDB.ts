@@ -274,7 +274,7 @@ export default class ShippingOrderRepositoryPostgres
     const totalPages = Math.ceil(totalRecords / limit);
 
     return {
-      data: result.rows,
+      report: result.rows,
       metrics: {
         totalShipments: result.rows.reduce(
           (acc, row) => acc + (row.totalShipments || 0),
